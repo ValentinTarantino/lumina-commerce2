@@ -1,0 +1,238 @@
+const { PrismaClient } = require("@prisma/client");
+
+const prisma = new PrismaClient();
+
+const products = [
+  {
+    id: "c1",
+    name: "iPhone 15 Pro Max",
+    price: 1199,
+    image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&q=80&w=800",
+    category: "Celulares",
+    description: "El iPhone más avanzado hasta la fecha, con chasis de titanio, chip A17 Pro y el sistema de cámaras más potente en un smartphone.",
+    descriptionEn: "The most advanced iPhone to date, featuring a titanium chassis, A17 Pro chip, and the most powerful camera system ever on a smartphone.",
+    stock: 2,
+  },
+  {
+    id: "c2",
+    name: "Samsung Galaxy S21 Ultra 5G",
+    price: 990,
+    image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=1171&auto=format&fit=crop",
+    category: "Celulares",
+    description: "Diseñado con una cámara de corte de contorno única para crear una revolución en la fotografía, permitiéndote capturar videos cinemáticos en 8K.",
+    descriptionEn: "Engineered with a unique contour-cut camera design to revolutionize photography, letting you capture cinematic 8K video with pro-grade precision.",
+    stock: 4,
+  },
+  {
+    id: "c3",
+    name: "Google Pixel 8 Pro",
+    price: 999,
+    image: "https://images.unsplash.com/photo-1756517313520-c6c25364ce65?q=80&w=1170&auto=format&fit=crop",
+    category: "Celulares",
+    description: "El teléfono de Google más potente hasta ahora, con la mejor cámara de su clase y funciones de IA que te ayudan a hacer más cada día.",
+    descriptionEn: "Google's most powerful phone yet, featuring a best-in-class camera and AI-powered features that help you accomplish more every single day.",
+    stock: 3,
+  },
+  {
+    id: "t1",
+    name: "Samsung Neo QLED 4K",
+    price: 3500,
+    image: "https://plus.unsplash.com/premium_photo-1683141392308-aaa39d916686?q=80&w=880&auto=format&fit=crop",
+    category: "Televisores",
+    description: "Experimenta una claridad asombrosa con la resolución 4K y la tecnología Quantum Matrix Pro para un contraste inigualable.",
+    descriptionEn: "Experience breathtaking clarity with 4K resolution and Quantum Matrix Pro technology for unrivaled contrast and depth in every scene.",
+    stock: 2,
+  },
+  {
+    id: "t2",
+    name: "LG C3 OLED Evo",
+    price: 1899,
+    image: "https://images.unsplash.com/photo-1567690187548-f07b1d7bf5a9?q=80&w=736&auto=format&fit=crop",
+    category: "Televisores",
+    description: "Negros perfectos y colores vibrantes gracias a los píxeles autoiluminados. El televisor definitivo para gamers y amantes del cine.",
+    descriptionEn: "Perfect blacks and vibrant colors powered by self-illuminating pixels. The ultimate display for gamers and cinema lovers alike.",
+    stock: 3,
+  },
+  {
+    id: "t3",
+    name: "Sony BRAVIA XR A80L",
+    price: 2299,
+    image: "https://plus.unsplash.com/premium_photo-1681236323432-3df82be0c1b0?w=600&auto=format&fit=crop&q=60",
+    category: "Televisores",
+    description: "Procesamiento cognitivo que entiende cómo ven y oyen los humanos para una experiencia de entretenimiento totalmente inmersiva.",
+    descriptionEn: "Cognitive processing that understands how humans see and hear, delivering a fully immersive entertainment experience like no other.",
+    stock: 2,
+  },
+  {
+    id: "ta1",
+    name: "iPad Pro M2",
+    price: 1099,
+    image: "https://images.unsplash.com/photo-1591094825572-244c7a90d7ca?q=80&w=880&auto=format&fit=crop",
+    category: "Tablets",
+    description: "Rendimiento fuera de serie con el chip M2, pantalla Liquid Retina XDR asombrosa y conectividad inalámbrica ultrarrápida.",
+    descriptionEn: "Extraordinary performance powered by the M2 chip, a stunning Liquid Retina XDR display, and blazing-fast wireless connectivity.",
+    stock: 5,
+  },
+  {
+    id: "ta2",
+    name: "Samsung Galaxy Tab S9 Ultra",
+    price: 1199,
+    image: "https://images.unsplash.com/photo-1589739900243-4b52cd9b104e?auto=format&fit=crop&q=80&w=800",
+    category: "Tablets",
+    description: "La tablet Android definitiva con una pantalla gigante de 14.6 pulgadas, S Pen incluido y resistencia al agua IP68.",
+    descriptionEn: "The ultimate Android tablet featuring a massive 14.6-inch display, an included S Pen, and IP68 water resistance for total peace of mind.",
+    stock: 4,
+  },
+  {
+    id: "ta3",
+    name: "Microsoft Surface Pro 9",
+    price: 999,
+    image: "https://images.unsplash.com/photo-1727132526959-c13b1f65c597?q=80&w=722&auto=format&fit=crop",
+    category: "Tablets",
+    description: "La versatilidad de una laptop y la flexibilidad de una tablet. Diseñada para trabajar, jugar y crear en cualquier lugar.",
+    descriptionEn: "The versatility of a laptop combined with the flexibility of a tablet. Designed to work, play, and create anywhere you go.",
+    stock: 3,
+  },
+  {
+    id: "au1",
+    name: "Sony WH-1000XM5",
+    price: 399,
+    image: "/products/sony-wh-1000xm5.png",
+    category: "Audio",
+    description: "Auriculares inalámbricos con cancelación de ruido líder y sonido de alta resolución para disfrutar cada detalle.",
+    descriptionEn: "Wireless headphones with industry-leading noise cancellation and high-resolution audio to enjoy every detail.",
+    stock: 8,
+  },
+  {
+    id: "au2",
+    name: "Bose QuietComfort Ultra",
+    price: 429,
+    image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=1000",
+    category: "Audio",
+    description: "Audio espacial inmersivo y comodidad premium para escuchar música durante todo el día.",
+    descriptionEn: "Immersive spatial audio and premium comfort for listening to music all day.",
+    stock: 6,
+  },
+  {
+    id: "au3",
+    name: "JBL Charge 5",
+    price: 179,
+    image: "/products/jbl-charge-5.png",
+    category: "Audio",
+    description: "Parlante portátil resistente al agua con sonido potente y batería para acompañarte en cualquier lugar.",
+    descriptionEn: "Water-resistant portable speaker with powerful sound and a battery built for wherever you go.",
+    stock: 10,
+  },
+  {
+    id: "l1",
+    name: "MacBook Pro 14 M3",
+    price: 1999,
+    image: "/products/macbook-pro-14-m3.png",
+    category: "Laptops",
+    description: "Laptop profesional con chip M3, pantalla Liquid Retina XDR y rendimiento para proyectos exigentes.",
+    descriptionEn: "Professional laptop with an M3 chip, Liquid Retina XDR display, and performance for demanding projects.",
+    stock: 4,
+  },
+  {
+    id: "l2",
+    name: "Dell XPS 15",
+    price: 1699,
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&q=80&w=1000",
+    category: "Laptops",
+    description: "Diseño compacto, pantalla de gran calidad y potencia para trabajar, crear y estudiar.",
+    descriptionEn: "Compact design, a high-quality display, and the power to work, create, and study.",
+    stock: 5,
+  },
+  {
+    id: "l3",
+    name: "ASUS Zenbook 14 OLED",
+    price: 1299,
+    image: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&q=80&w=1000",
+    category: "Laptops",
+    description: "Ultrabook liviana con pantalla OLED, batería de larga duración y rendimiento portátil.",
+    descriptionEn: "Lightweight ultrabook with an OLED display, long battery life, and portable performance.",
+    stock: 7,
+  },
+  {
+    id: "g1",
+    name: "PlayStation 5 Slim",
+    price: 499,
+    image: "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&q=80&w=1000",
+    category: "Gaming",
+    description: "Consola de nueva generación con tiempos de carga rápidos, gráficos detallados y experiencias inmersivas.",
+    descriptionEn: "Next-generation console with fast load times, detailed graphics, and immersive experiences.",
+    stock: 5,
+  },
+  {
+    id: "g2",
+    name: "Xbox Series X",
+    price: 499,
+    image: "https://images.unsplash.com/photo-1621259182978-fbf93132d53d?auto=format&fit=crop&q=80&w=1000",
+    category: "Gaming",
+    description: "Consola de alto rendimiento con resolución 4K, tiempos de carga reducidos y acceso a un amplio catálogo.",
+    descriptionEn: "High-performance console with 4K resolution, reduced load times, and access to a wide game library.",
+    stock: 4,
+  },
+  {
+    id: "g3",
+    name: "Nintendo Switch OLED",
+    price: 349,
+    image: "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?auto=format&fit=crop&q=80&w=1000",
+    category: "Gaming",
+    description: "Consola híbrida con pantalla OLED vibrante para jugar en casa o llevar tus juegos a cualquier parte.",
+    descriptionEn: "Hybrid console with a vibrant OLED screen for playing at home or taking your games anywhere.",
+    stock: 8,
+  },
+  {
+    id: "ac1",
+    name: "Logitech MX Master 3S",
+    price: 99,
+    image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&q=80&w=1000",
+    category: "Accesorios",
+    description: "Mouse inalámbrico ergonómico con desplazamiento de precisión y botones personalizables.",
+    descriptionEn: "Ergonomic wireless mouse with precise scrolling and customizable buttons.",
+    stock: 12,
+  },
+  {
+    id: "ac2",
+    name: "Keychron K2 Pro",
+    price: 119,
+    image: "/products/keychron-k2-pro.png",
+    category: "Accesorios",
+    description: "Teclado mecánico compacto con conexión inalámbrica y distribución cómoda para trabajar o jugar.",
+    descriptionEn: "Compact mechanical keyboard with wireless connectivity and a comfortable layout for work or play.",
+    stock: 9,
+  },
+  {
+    id: "ac3",
+    name: "Anker 737 Power Bank",
+    price: 149,
+    image: "/products/anker-powerbank.png",
+    category: "Accesorios",
+    description: "Batería externa de alta capacidad con carga rápida para mantener tus dispositivos listos durante el día.",
+    descriptionEn: "High-capacity power bank with fast charging to keep your devices ready throughout the day.",
+    stock: 11,
+  },
+];
+
+async function main() {
+  for (const product of products) {
+    const { stock, ...productData } = product;
+    await prisma.product.upsert({
+      where: { id: product.id },
+      create: product,
+      update: productData,
+    });
+  }
+
+  console.log(`Seeded ${products.length} products; existing stock levels were preserved.`);
+}
+
+main()
+  .catch((error) => {
+    console.error("Failed to seed products:", error);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

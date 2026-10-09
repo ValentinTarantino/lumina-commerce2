@@ -1,0 +1,63 @@
+services:
+  # ─────────────────────────────────────────────
+  # Servicio 1: Backend FastAPI (Python)
+  # ─────────────────────────────────────────────
+  - type: web
+    name: lumina-api
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /internal/payments/health
+    envVars:
+      # ── Stripe ──────────────────────────────────────────────────────────
+      - key: STRIPE_SECRET_KEY
+        sync: false   # <-- completar en el Dashboard de Render
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      # ── Mercado Pago ─────────────────────────────────────────────────────
+      - key: MERCADOPAGO_ACCESS_TOKEN
+        sync: false
+      - key: MERCADOPAGO_PUBLIC_KEY
+        sync: false
+      # ── Seguridad interna ────────────────────────────────────────────────
+      - key: PAYMENTS_INTERNAL_TOKEN
+        sync: false
+      # ── CORS: completar DESPUÉS de saber la URL del frontend ─────────────
+      - key: FRONTEND_ORIGINS
+        sync: false   # ej: https://lumina-web.onrender.com
+
+  # ─────────────────────────────────────────────
+  # Servicio 2: Frontend Next.js (Node)
+  # ─────────────────────────────────────────────
+  - type: web
+    name: lumina-web
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      # ── Base de datos (Neon) ─────────────────────────────────────────────
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      # ── Auth ─────────────────────────────────────────────────────────────
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false   # ej: https://lumina-web.onrender.com
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      # ── Stripe (clave pública, solo para el frontend) ────────────────────
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      # ── Conexión con el backend Python ───────────────────────────────────
+      - key: PAYMENTS_API_URL
+        sync: false   # ej: https://lumina-api.onrender.com
+      - key: PAYMENTS_INTERNAL_TOKEN
+        sync: false
