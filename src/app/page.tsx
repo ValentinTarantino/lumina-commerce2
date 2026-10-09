@@ -251,13 +251,13 @@ export default function Home() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedProduct(null)}
-              className="absolute inset-0 bg-black/90 backdrop-blur-2xl"
+              className="absolute inset-0 bg-black/95 md:bg-black/90 md:backdrop-blur-md"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-6xl bg-[#09090b] border border-white/10 rounded-[1.75rem] md:rounded-[2.5rem] p-4 sm:p-6 md:p-8 lg:p-10 shadow-[0_32px_120px_rgba(0,0,0,0.7)] overflow-hidden max-h-[calc(100dvh-1rem)] md:max-h-[90vh] overflow-y-auto"
+              className="relative w-full max-w-6xl bg-[#09090b] border border-white/10 rounded-[1.75rem] md:rounded-[2.5rem] p-4 sm:p-6 md:p-8 lg:p-10 shadow-2xl md:shadow-[0_32px_120px_rgba(0,0,0,0.7)] overflow-hidden max-h-[calc(100dvh-1rem)] md:max-h-[90vh] overflow-y-auto will-change-transform"
             >
               <div className="absolute -top-40 left-1/4 hidden md:block w-96 h-96 rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none" />
               <button 
@@ -287,12 +287,6 @@ export default function Home() {
                         ? (selectedProduct.description_en || "A masterpiece of digital engineering designed to exceed all expectations.")
                         : (selectedProduct.description || "Una obra maestra de ingeniería digital diseñada para superar cualquier expectativa.")}
                     </p>
-                    <div className={`mt-5 inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] ${selectedProduct.stock > 0 ? "border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-300" : "border-red-400/20 bg-red-400/[0.07] text-red-300"}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${selectedProduct.stock > 0 ? "bg-emerald-400" : "bg-red-400"}`} />
-                      {selectedProduct.stock > 0
-                        ? t.products.stockAvailable.replace("{count}", String(selectedProduct.stock))
-                        : t.products.outOfStock}
-                    </div>
                   </div>
 
                   <div className="bg-gradient-to-br from-white/[0.07] to-white/[0.025] border border-white/10 p-5 md:p-6 rounded-2xl md:rounded-[1.75rem] space-y-5 shadow-inner">
