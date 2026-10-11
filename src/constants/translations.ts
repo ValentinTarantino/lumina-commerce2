@@ -40,7 +40,8 @@ export const translations = {
         Procesadores: "Procesadores",
         "Placas de video": "Placas de video",
         "Fuentes de poder": "Fuentes de poder",
-        Gabinetes: "Gabinetes"
+        Gabinetes: "Gabinetes",
+        Monitores: "Monitores"
       }
     },
     news: {
@@ -206,7 +207,8 @@ export const translations = {
         Procesadores: "Processors",
         "Placas de video": "Graphics cards",
         "Fuentes de poder": "Power supplies",
-        Gabinetes: "PC cases"
+        Gabinetes: "PC cases",
+        Monitores: "Monitors"
       }
     },
     news: {

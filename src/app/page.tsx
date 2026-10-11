@@ -38,15 +38,16 @@ const pcPartCategories = new Set([
   "Placas de video",
   "Fuentes de poder",
   "Gabinetes",
+  "Monitores",
 ]);
 
 function ProductZoom({ image, alt, isComponent }: { image: string, alt: string, isComponent: boolean }) {
   return (
-    <div className={`relative aspect-video md:aspect-square overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 group/zoom ${isComponent ? "bg-[#f5f5f5]" : "bg-white/[0.02]"}`}>
+    <div className={`relative aspect-video md:aspect-square overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 group/zoom ${isComponent ? "bg-white" : "bg-white/[0.02]"}`}>
       <img 
         src={image} 
         alt={alt}
-        className={`w-full h-full transition-transform duration-700 ease-out ${isComponent ? "object-contain p-6" : "object-cover group-hover/zoom:scale-125"}`}
+        className={`w-full h-full transition-transform duration-700 ease-out ${isComponent ? "object-contain p-6 group-hover/zoom:scale-110" : "object-cover group-hover/zoom:scale-125"}`}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
     </div>
@@ -749,11 +750,11 @@ export default function Home() {
                   onClick={() => setSelectedProduct(product)}
                   className="group glass-card overflow-hidden flex flex-col cursor-pointer"
                 >
-                  <div className={`relative aspect-[4/5] overflow-hidden m-4 rounded-[1.5rem] ${pcPartCategories.has(product.category) ? "bg-[#f5f5f5]" : ""}`}>
+                  <div className={`relative aspect-[4/5] overflow-hidden m-4 rounded-[1.5rem] ${pcPartCategories.has(product.category) ? "bg-white" : ""}`}>
                     <img 
                       src={product.image} 
                       alt={product.name}
-                      className={`w-full h-full transition-transform duration-1000 ease-out ${pcPartCategories.has(product.category) ? "object-contain p-6" : "object-cover group-hover:scale-105"}`}
+                      className={`w-full h-full transition-transform duration-1000 ease-out ${pcPartCategories.has(product.category) ? "object-contain p-6 group-hover:scale-110" : "object-cover group-hover:scale-105"}`}
                     />
                     <div className="absolute top-4 left-4 flex gap-2">
                       <span className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase italic">
