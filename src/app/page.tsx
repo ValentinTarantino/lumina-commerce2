@@ -23,6 +23,12 @@ const HeroThreeScene = dynamic(() => import("@/components/HeroThreeScene"), {
 });
 
 type TrackingItem = { id: string; name: string; quantity: number };
+type ProductComment = {
+  id: string;
+  text: string;
+  createdAt: string;
+  user: { name: string | null };
+};
 type TrackingOrder = {
   createdAt: string;
   deliveryDate: string;
@@ -95,10 +101,10 @@ export default function Home() {
   }, []);
 
   const heroSlides = [
-    { name: "Neural Engine", nameEs: "Motor neuronal", metric: "99.8%", detail: "AI COMPUTE", detailEs: "CÓMPUTO DE IA" },
-    { name: "Quantum Core", nameEs: "Núcleo cuántico", metric: "2.4 THz", detail: "PROCESSING", detailEs: "PROCESAMIENTO" },
-    { name: "Photon Network", nameEs: "Red fotónica", metric: "0.4 ms", detail: "LOW LATENCY", detailEs: "BAJA LATENCIA" },
-    { name: "Cloud Matrix", nameEs: "Matriz en la nube", metric: "12.8 TB", detail: "MEMORY LINK", detailEs: "ENLACE DE MEMORIA" },
+    { category: "Procesadores", name: lang === "es" ? "Procesadores" : "Processors", detail: "AMD · INTEL" },
+    { category: "Placas de video", name: lang === "es" ? "Tarjeta gráfica" : "Graphics card", detail: "NVIDIA · RADEON" },
+    { category: "RAMs", name: lang === "es" ? "Memoria RAM" : "RAM memory", detail: "DDR4 · DDR5" },
+    { category: "Fuentes de poder", name: lang === "es" ? "Fuente de poder" : "Power supply", detail: lang === "es" ? "POTENCIA · EFICIENCIA" : "POWER · EFFICIENCY" },
   ];
 
   useEffect(() => {
@@ -113,6 +119,13 @@ export default function Home() {
   }, [isMobileSearchOpen]);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productComments, setProductComments] = useState<ProductComment[]>([]);
+  const [commentsProductId, setCommentsProductId] = useState<string | null>(null);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [commentDraft, setCommentDraft] = useState("");
+  const [commentError, setCommentError] = useState("");
+  const [commentNotice, setCommentNotice] = useState("");
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -177,6 +190,35 @@ export default function Home() {
   }, [selectedProduct]);
 
   useEffect(() => {
+    if (!selectedProduct) return;
+
+    const controller = new AbortController();
+    const productId = selectedProduct.id;
+
+    fetch(`/api/products/${encodeURIComponent(productId)}/comments`, {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("comments_request_failed");
+        const comments = await response.json();
+        if (!Array.isArray(comments)) throw new Error("invalid_comments_response");
+        setProductComments(comments as ProductComment[]);
+        setCommentsProductId(productId);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof Error && error.name === "AbortError") return;
+        setCommentError(t.comments.loadError);
+        setCommentsProductId(productId);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoadingComments(false);
+      });
+
+    return () => controller.abort();
+  }, [selectedProduct?.id, t.comments.loadError]);
+
+  useEffect(() => {
     if (showToast) {
       const timer = setTimeout(() => setShowToast(false), 3000);
       return () => clearTimeout(timer);
@@ -207,6 +249,9 @@ export default function Home() {
   }, []);
 
   const categories = ["Todos", ...new Set(products.map((product) => product.category))];
+  const componentCategories = ["Procesadores", "Placas de video", "RAMs", "Fuentes de poder", "Gabinetes", "Monitores"]
+    .map((category) => ({ category, product: products.find((product) => product.category === category) }))
+    .filter((item): item is { category: string; product: Product } => Boolean(item.product));
   const filteredProducts = products.filter(p => 
     (activeCategory === "Todos" || p.category === activeCategory) && 
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -217,6 +262,49 @@ export default function Home() {
     setIsMobileSearchOpen(false);
     setIsMobileMenuOpen(false);
     document.getElementById("productos")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const openProduct = (product: Product) => {
+    setIsLoadingComments(true);
+    setCommentsProductId(null);
+    setProductComments([]);
+    setCommentDraft("");
+    setCommentError("");
+    setCommentNotice("");
+    setSelectedProduct(product);
+  };
+
+  const handlePostComment = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!selectedProduct) return;
+    if (!session) {
+      await signIn("google");
+      return;
+    }
+
+    const text = commentDraft.trim();
+    if (text.length < 2 || text.length > 600) return;
+
+    setIsSubmittingComment(true);
+    setCommentError("");
+    setCommentNotice("");
+    try {
+      const response = await fetch(`/api/products/${encodeURIComponent(selectedProduct.id)}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!response.ok) throw new Error("comment_post_failed");
+
+      const comment = (await response.json()) as ProductComment;
+      setProductComments((current) => [comment, ...current]);
+      setCommentDraft("");
+      setCommentNotice(t.comments.posted);
+    } catch {
+      setCommentError(t.comments.postError);
+    } finally {
+      setIsSubmittingComment(false);
+    }
   };
 
   return (
@@ -356,6 +444,85 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+
+              <section aria-labelledby="product-comments-title" className="relative mt-7 border-t border-white/10 pt-6 md:mt-9 md:pt-8">
+                <div className="mb-5 flex items-center justify-between gap-3">
+                  <h3 id="product-comments-title" className="text-lg font-black uppercase italic tracking-tight text-white">
+                    {t.comments.title}
+                  </h3>
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-bold tracking-wider text-white/50">
+                    {commentsProductId === selectedProduct.id ? productComments.length : 0}
+                  </span>
+                </div>
+
+                {session ? (
+                  <form onSubmit={handlePostComment} className="mb-5">
+                    <label htmlFor="product-comment" className="sr-only">{t.comments.placeholder}</label>
+                    <textarea
+                      id="product-comment"
+                      value={commentDraft}
+                      onChange={(event) => setCommentDraft(event.target.value)}
+                      placeholder={t.comments.placeholder}
+                      minLength={2}
+                      maxLength={600}
+                      rows={3}
+                      required
+                      disabled={isSubmittingComment}
+                      className="w-full resize-y rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-sm leading-relaxed text-white outline-none transition-colors placeholder:text-white/30 focus:border-indigo-400/60 disabled:opacity-60"
+                    />
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                      <span className="text-xs text-white/35">{commentDraft.length}/600 {t.comments.characterCount}</span>
+                      <button
+                        type="submit"
+                        disabled={isSubmittingComment || commentDraft.trim().length < 2}
+                        className="rounded-xl bg-white px-5 py-3 text-xs font-black text-black transition-colors hover:bg-indigo-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isSubmittingComment ? t.comments.loading : t.comments.submit}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="mb-5 flex flex-col items-start justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 sm:flex-row sm:items-center">
+                    <p className="text-sm text-white/55">{t.comments.login}</p>
+                    <button
+                      type="button"
+                      onClick={() => signIn("google")}
+                      className="rounded-xl bg-white px-5 py-3 text-xs font-black text-black transition-colors hover:bg-indigo-200"
+                    >
+                      {t.nav.login}
+                    </button>
+                  </div>
+                )}
+
+                {commentError && (
+                  <p role="alert" className="mb-4 text-sm text-rose-300">{commentError}</p>
+                )}
+                {commentNotice && (
+                  <p role="status" className="mb-4 text-sm text-emerald-300">{commentNotice}</p>
+                )}
+
+                <div className="max-h-64 space-y-3 overflow-y-auto pr-1">
+                  {isLoadingComments || commentsProductId !== selectedProduct.id ? (
+                    <p className="py-4 text-sm text-white/40">{t.comments.loading}</p>
+                  ) : commentError && productComments.length === 0 ? null : productComments.length === 0 ? (
+                    <p className="rounded-2xl border border-dashed border-white/10 px-4 py-5 text-sm leading-relaxed text-white/40">
+                      {t.comments.empty}
+                    </p>
+                  ) : (
+                    productComments.map((comment) => (
+                      <article key={comment.id} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-xs font-bold text-indigo-200">{comment.user.name || (lang === "es" ? "Usuario" : "Customer")}</span>
+                          <time dateTime={comment.createdAt} className="text-[10px] text-white/30">
+                            {new Intl.DateTimeFormat(lang === "es" ? "es-AR" : "en-US", { dateStyle: "medium" }).format(new Date(comment.createdAt))}
+                          </time>
+                        </div>
+                        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-white/70">{comment.text}</p>
+                      </article>
+                    ))
+                  )}
+                </div>
+              </section>
             </motion.div>
           </div>
         )}
@@ -600,7 +767,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <section className="relative pt-44 pb-32 px-6 overflow-hidden min-h-[90vh] flex items-center">
+      <section className="relative pt-32 pb-20 md:pt-36 md:pb-24 px-6 overflow-hidden min-h-[78vh] flex items-center">
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
           <div className="absolute top-[10%] left-[-5%] w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[180px] animate-pulse-soft"></div>
           <div className="absolute bottom-[10%] right-[-5%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[160px] animate-pulse-soft delay-1000"></div>
@@ -614,13 +781,16 @@ export default function Home() {
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             className="flex flex-col items-center lg:items-start text-center lg:text-left"
           >
+            <p className="mb-5 text-[10px] md:text-xs font-black tracking-[0.28em] text-indigo-300 uppercase">
+              {t.hero.eyebrow}
+            </p>
             <h1 className="text-6xl xs:text-7xl md:text-8xl lg:text-9xl font-black mb-6 md:mb-10 leading-[0.85] md:leading-[0.8] tracking-tighter uppercase italic">
               {t.hero.defying} <br /> 
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/20">{t.hero.limits}</span>
             </h1>
             
             <p className="max-w-lg text-base md:text-lg text-white/40 mb-12 leading-relaxed font-medium italic border-l-0 lg:border-l-2 border-indigo-600/30 lg:pl-8">
-              {t.hero.tagline}
+              {t.hero.componentTagline}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 w-full sm:w-auto">
@@ -628,7 +798,7 @@ export default function Home() {
                 onClick={() => document.getElementById('productos')?.scrollIntoView({ behavior: 'smooth' })}
                 className="premium-btn w-full sm:w-auto px-12 group"
               >
-                {t.hero.exploreBtn} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-2" />
+                {t.hero.componentsBtn} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-2" />
               </button>
               <button 
                 onClick={() => document.getElementById('destacados')?.scrollIntoView({ behavior: 'smooth' })}
@@ -641,7 +811,12 @@ export default function Home() {
 
           <div className="relative w-full max-w-2xl mx-auto lg:mx-0">
             <div className="relative z-10 w-full aspect-[4/3] md:aspect-square">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_52%_48%,rgba(79,70,229,0.2),transparent_58%)]" />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `radial-gradient(ellipse at 52% 48%, ${heroSceneAccents[currentSlide]}55 0%, ${heroSceneAccents[currentSlide]}28 34%, transparent 72%), radial-gradient(ellipse at 52% 52%, rgba(91, 76, 190, 0.2), transparent 68%)`,
+                }}
+              />
               <HeroThreeScene slide={currentSlide} />
 
               <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#05050b]/80 via-[#05050b]/25 to-transparent pointer-events-none z-[1]" />
@@ -649,13 +824,12 @@ export default function Home() {
               <div className="absolute bottom-5 left-3 md:bottom-8 md:left-6 z-10 pointer-events-none">
                 <div className="mb-1.5 flex items-center gap-2">
                   <p className="text-[8px] md:text-[9px] font-bold tracking-[0.2em] text-[#39ff14] uppercase font-mono">
-                    {lang === "es" ? heroSlides[currentSlide].nameEs : heroSlides[currentSlide].name}
+                    {heroSlides[currentSlide].name}
                   </p>
                 </div>
                 <p className="text-[8px] md:text-[9px] font-bold tracking-[0.24em] text-[#39ff14]/80 uppercase font-mono">
-                  {lang === "es" ? heroSlides[currentSlide].detailEs : heroSlides[currentSlide].detail}
+                  {heroSlides[currentSlide].detail}
                 </p>
-                <p className="mt-1 text-xl md:text-2xl font-bold tracking-tight text-[#39ff14] font-mono drop-shadow-[0_0_12px_rgba(57,255,20,0.4)]">{heroSlides[currentSlide].metric}</p>
               </div>
 
               <div className="absolute bottom-7 md:bottom-10 right-3 md:right-6 z-10 flex items-center gap-2">
@@ -663,7 +837,7 @@ export default function Home() {
                   <button
                     key={slide.name}
                     type="button"
-                    aria-label={lang === "es" ? `Mostrar diapositiva ${idx + 1}: ${slide.nameEs}` : `Show slide ${idx + 1}: ${slide.name}`}
+                    aria-label={lang === "es" ? `Mostrar diapositiva ${idx + 1}: ${slide.name}` : `Show slide ${idx + 1}: ${slide.name}`}
                     aria-current={currentSlide === idx ? "true" : undefined}
                     onClick={() => setCurrentSlide(idx)}
                     className={`h-1.5 rounded-full transition-all duration-500 ${
@@ -681,6 +855,36 @@ export default function Home() {
           </div>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-[#020203] pointer-events-none z-20" />
+      </section>
+
+      <section aria-label={t.hero.categoriesTitle} className="relative z-20 -mt-4 pb-16 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between gap-4 mb-5">
+            <h2 className="text-xs md:text-sm font-black tracking-[0.18em] text-white/55 uppercase">{t.hero.categoriesTitle}</h2>
+            <span className="hidden sm:block text-[10px] tracking-widest uppercase text-white/25">{lang === "es" ? "Elegí tu próximo upgrade" : "Find your next upgrade"}</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+            {componentCategories.map(({ category, product }) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => {
+                  setActiveCategory(category);
+                  document.getElementById("productos")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="group flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.025] p-3 text-left transition-all hover:border-indigo-400/40 hover:bg-white/[0.06]"
+              >
+                <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
+                  <img src={product.image} alt="" className="h-full w-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-110" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[10px] md:text-[11px] font-black uppercase tracking-wide text-white/70 group-hover:text-white">{(t.products.categories as Record<string, string>)[category] || category}</span>
+                  <span className="mt-1 block text-[9px] uppercase tracking-widest text-indigo-300/70">{lang === "es" ? "Explorar" : "Explore"} <ArrowRight className="ml-1 inline h-3 w-3 transition-transform group-hover:translate-x-1" /></span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section id="productos" className="py-24 px-6 max-w-7xl mx-auto">
@@ -746,7 +950,7 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  onClick={() => setSelectedProduct(product)}
+                  onClick={() => openProduct(product)}
                   className="group glass-card overflow-hidden flex flex-col cursor-pointer"
                 >
                   <div className={`relative aspect-[4/5] overflow-hidden m-4 rounded-[1.5rem] ${pcPartCategories.has(product.category) || product.id === "ac6" ? "bg-white" : ""}`}>

@@ -34,6 +34,128 @@ function addTrace(parent: THREE.Group, points: THREE.Vector3[], material: THREE.
   return trace;
 }
 
+function addProductBox(
+  parent: THREE.Group,
+  size: [number, number, number],
+  position: [number, number, number],
+  material: THREE.Material,
+) {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
+  mesh.position.set(...position);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  parent.add(mesh);
+  return mesh;
+}
+
+function createGraphicsCard(accent: THREE.Material) {
+  const card = new THREE.Group();
+  card.rotation.set(-0.08, -0.2, 0.02);
+  const pcb = new THREE.MeshStandardMaterial({ color: 0x10151c, metalness: 0.62, roughness: 0.38 });
+  const shroud = new THREE.MeshStandardMaterial({ color: 0x242832, metalness: 0.68, roughness: 0.25 });
+  const fan = new THREE.MeshStandardMaterial({ color: 0x090b10, metalness: 0.45, roughness: 0.32 });
+  const metal = new THREE.MeshStandardMaterial({ color: 0x9ba4b3, metalness: 0.88, roughness: 0.24 });
+  const gold = new THREE.MeshStandardMaterial({ color: 0xc9a86a, metalness: 0.92, roughness: 0.22 });
+
+  addProductBox(card, [3.25, 0.16, 1.55], [0, 0, 0], pcb);
+  addProductBox(card, [3.18, 0.28, 1.5], [0, 0.19, 0], shroud);
+  addProductBox(card, [0.1, 0.68, 1.48], [-1.65, 0.02, 0], metal);
+  addProductBox(card, [1.4, 0.035, 0.16], [0, 0.35, -0.6], accent);
+
+  for (const x of [-0.95, 0, 0.95]) {
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.39, 0.025, 8, 40), metal);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(x, 0.35, 0);
+    card.add(ring);
+
+    const rotor = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.035, 40), fan);
+    rotor.position.set(x, 0.34, 0);
+    card.add(rotor);
+
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.05, 32), accent);
+    hub.position.set(x, 0.39, 0);
+    card.add(hub);
+
+    for (let bladeIndex = 0; bladeIndex < 7; bladeIndex += 1) {
+      const angle = (bladeIndex / 7) * Math.PI * 2;
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.025, 0.23), metal);
+      blade.position.set(x + Math.cos(angle) * 0.2, 0.375, Math.sin(angle) * 0.2);
+      blade.rotation.y = -angle + 0.48;
+      card.add(blade);
+    }
+  }
+
+  for (let index = 0; index < 12; index += 1) {
+    addProductBox(card, [0.105, 0.035, 0.24], [-0.75 + index * 0.13, -0.11, 0.7], gold);
+  }
+  return card;
+}
+
+function createMemoryModule(accent: THREE.Material) {
+  const ram = new THREE.Group();
+  ram.rotation.set(-0.04, -0.22, 0.02);
+  const pcb = new THREE.MeshStandardMaterial({ color: 0x10151c, metalness: 0.55, roughness: 0.4 });
+  const heatSpreader = new THREE.MeshStandardMaterial({ color: 0x232832, metalness: 0.76, roughness: 0.25 });
+  const contact = new THREE.MeshStandardMaterial({ color: 0xd3b66f, metalness: 0.94, roughness: 0.2 });
+  const memoryChip = new THREE.MeshStandardMaterial({ color: 0x090b10, metalness: 0.38, roughness: 0.32 });
+
+  addProductBox(ram, [2.8, 0.2, 0.18], [0, 0.05, 0], pcb);
+  addProductBox(ram, [2.72, 0.58, 0.26], [0, 0.39, 0], heatSpreader);
+  addProductBox(ram, [2.55, 0.08, 0.25], [0, 0.72, 0], accent);
+
+  for (let index = 0; index < 10; index += 1) {
+    const x = -1.27 + index * 0.282;
+    addProductBox(ram, [0.045, 0.12, 0.28], [x, 0.06, 0.01], contact);
+    if (index % 2 === 0) addProductBox(ram, [0.15, 0.2, 0.025], [x, 0.35, 0.145], memoryChip);
+  }
+
+  for (let index = 0; index < 9; index += 1) {
+    addProductBox(ram, [0.025, 0.31, 0.035], [-1.12 + index * 0.28, 0.39, 0.15], heatSpreader);
+  }
+  return ram;
+}
+
+function createPowerSupply(accent: THREE.Material) {
+  const powerSupply = new THREE.Group();
+  powerSupply.rotation.set(-0.06, -0.22, 0);
+  const casing = new THREE.MeshStandardMaterial({ color: 0x1c2028, metalness: 0.68, roughness: 0.28 });
+  const grille = new THREE.MeshStandardMaterial({ color: 0x090b10, metalness: 0.4, roughness: 0.34 });
+  const steel = new THREE.MeshStandardMaterial({ color: 0x9099a7, metalness: 0.86, roughness: 0.25 });
+
+  addProductBox(powerSupply, [1.9, 0.92, 1.48], [0, 0.48, 0], casing);
+
+  const fanWell = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.045, 48), grille);
+  fanWell.rotation.x = Math.PI / 2;
+  fanWell.position.set(0, 0.5, 0.76);
+  powerSupply.add(fanWell);
+
+  const fanRing = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.025, 8, 48), steel);
+  fanRing.position.set(0, 0.5, 0.8);
+  powerSupply.add(fanRing);
+
+  const fanHub = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.06, 32), accent);
+  fanHub.rotation.x = Math.PI / 2;
+  fanHub.position.set(0, 0.5, 0.81);
+  powerSupply.add(fanHub);
+
+  for (let bladeIndex = 0; bladeIndex < 9; bladeIndex += 1) {
+    const angle = (bladeIndex / 9) * Math.PI * 2;
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.27, 0.025), steel);
+    blade.position.set(Math.cos(angle) * 0.23, 0.5 + Math.sin(angle) * 0.23, 0.81);
+    blade.rotation.z = angle + 0.35;
+    powerSupply.add(blade);
+  }
+
+  for (let index = 0; index < 5; index += 1) {
+    const port = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.035), grille);
+    port.position.set(-0.65 + index * 0.31, 0.48, -0.76);
+    powerSupply.add(port);
+  }
+
+  addProductBox(powerSupply, [1.15, 0.025, 0.035], [0, 0.88, 0.35], accent);
+  return powerSupply;
+}
+
 export default function HeroThreeScene({ slide }: { slide: number }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const slideRef = useRef(slide);
@@ -97,6 +219,15 @@ export default function HeroThreeScene({ slide }: { slide: number }) {
     const rimLight = new THREE.PointLight(0x6366f1, 42, 12);
     rimLight.position.set(3, 2.2, -2);
     scene.add(rimLight);
+
+    const productAccent = new THREE.MeshStandardMaterial({
+      color: heroSceneAccents[slideRef.current % heroSceneAccents.length],
+      emissive: new THREE.Color(heroSceneAccents[slideRef.current % heroSceneAccents.length]),
+      emissiveIntensity: 0.52,
+      metalness: 0.58,
+      roughness: 0.24,
+    });
+    accentMaterials.current.push(productAccent);
 
     const chip = new THREE.Group();
     chip.rotation.set(-0.1, -0.28, 0);
@@ -249,6 +380,22 @@ export default function HeroThreeScene({ slide }: { slide: number }) {
     satellite.add(satelliteCore);
     orbit.add(satellite);
 
+    const graphicsCard = createGraphicsCard(productAccent);
+    graphicsCard.position.y = -0.2;
+    const memoryModule = createMemoryModule(productAccent);
+    memoryModule.position.y = -0.36;
+    const powerSupply = createPowerSupply(productAccent);
+    powerSupply.position.y = -0.48;
+    scene.add(graphicsCard, memoryModule, powerSupply);
+
+    const productModels = [chip, graphicsCard, memoryModule, powerSupply];
+    let activeModel = ((slideRef.current % productModels.length) + productModels.length) % productModels.length;
+    let outgoingModel = activeModel;
+    let modelTransition = 1;
+    productModels.forEach((model, index) => {
+      model.visible = index === activeModel;
+    });
+
     const floor = new THREE.Mesh(
       new THREE.CircleGeometry(3.8, 80),
       new THREE.MeshBasicMaterial({
@@ -304,8 +451,33 @@ export default function HeroThreeScene({ slide }: { slide: number }) {
       previousTime = time;
       if (!reduceMotion) animationTime += delta;
 
+      const requestedModel = ((slideRef.current % productModels.length) + productModels.length) % productModels.length;
+      if (requestedModel !== activeModel) {
+        outgoingModel = activeModel;
+        activeModel = requestedModel;
+        modelTransition = 0;
+        productModels[outgoingModel].visible = true;
+        productModels[activeModel].visible = true;
+        productModels[outgoingModel].scale.setScalar(1);
+        productModels[activeModel].scale.setScalar(0.72);
+      }
+
+      if (modelTransition < 1) {
+        modelTransition = Math.min(1, modelTransition + delta * (reduceMotion ? 5 : 2.4));
+        const easedTransition = modelTransition * modelTransition * (3 - 2 * modelTransition);
+        productModels[outgoingModel].scale.setScalar(1 - easedTransition);
+        productModels[activeModel].scale.setScalar(0.72 + easedTransition * 0.28);
+        if (modelTransition === 1) {
+          productModels[outgoingModel].visible = false;
+          productModels[outgoingModel].scale.setScalar(1);
+        }
+      }
+
       chip.rotation.y = -0.28 + (reduceMotion ? 0 : Math.sin(animationTime * 0.35) * 0.08);
       chip.position.y = reduceMotion ? 0 : Math.sin(animationTime * 0.8) * 0.08;
+      graphicsCard.position.y = -0.2 + (reduceMotion ? 0 : Math.sin(animationTime * 0.8) * 0.06);
+      memoryModule.position.y = -0.36 + (reduceMotion ? 0 : Math.sin(animationTime * 0.8) * 0.06);
+      powerSupply.position.y = -0.48 + (reduceMotion ? 0 : Math.sin(animationTime * 0.8) * 0.06);
       orbit.rotation.z = reduceMotion ? orbit.rotation.z : animationTime * 0.09;
       orbitSecondary.rotation.z = reduceMotion ? orbitSecondary.rotation.z : -animationTime * 0.06;
       satelliteCore.rotation.set(animationTime * 0.4, animationTime * 0.7, animationTime * 0.3);
@@ -347,7 +519,7 @@ export default function HeroThreeScene({ slide }: { slide: number }) {
     <div
       ref={hostRef}
       role="img"
-      aria-label="3D holographic processor with illuminated circuit traces"
+      aria-label="Interactive 3D PC components: processor, graphics card, memory and power supply"
       className="absolute inset-0"
     >
       {rendererFailed && (

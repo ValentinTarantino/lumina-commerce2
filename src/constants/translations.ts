@@ -12,8 +12,12 @@ export const translations = {
     },
     hero: {
       experience: "Lumina Experience 2026",
-      defying: "DEFYING",
-      limits: "LIMITS.",
+      eyebrow: "Componentes para armar tu próxima PC",
+      categoriesTitle: "Explorá por componente",
+      defying: "ARMÁ",
+      limits: "TU PC.",
+      componentTagline: "Procesadores, placas de video, memoria, fuentes y más: elegí cada pieza para crear un equipo que sea realmente tuyo.",
+      componentsBtn: "Explorar componentes",
       tagline: "Vanguardia tecnológica en cada fibra. Hardware de alto rendimiento diseñado para quienes lideran la era digital.",
       exploreBtn: "Explorar Colección",
       launchesBtn: "Ver destacados"
@@ -61,6 +65,18 @@ export const translations = {
       catalogBtn: "Explorar catálogo",
       label: "Selección Lumina",
       discover: "Ver producto"
+    },
+    comments: {
+      title: "Comentarios del producto",
+      empty: "Todavía no hay comentarios. ¡Sé el primero en compartir tu opinión!",
+      placeholder: "Contá tu experiencia con este producto...",
+      submit: "Publicar comentario",
+      login: "Iniciá sesión para comentar",
+      loading: "Cargando comentarios...",
+      loadError: "No se pudieron cargar los comentarios.",
+      postError: "No se pudo publicar. Intentá de nuevo.",
+      posted: "Comentario publicado.",
+      characterCount: "caracteres"
     },
     tracking: {
       title: "Centro de Rastreo.",
@@ -179,8 +195,12 @@ export const translations = {
     },
     hero: {
       experience: "Lumina Experience 2026",
-      defying: "DEFYING",
-      limits: "LIMITS.",
+      eyebrow: "PC components, chosen for your next build",
+      categoriesTitle: "Shop by component",
+      defying: "BUILD",
+      limits: "YOUR PC.",
+      componentTagline: "Processors, graphics cards, memory, power supplies and more. Choose every part and build a setup that feels like yours.",
+      componentsBtn: "Explore components",
       tagline: "Technological avant-garde in every fiber. High-performance hardware designed for those leading the digital era.",
       exploreBtn: "Explore Collection",
       launchesBtn: "View featured tech"
@@ -228,6 +248,18 @@ export const translations = {
       catalogBtn: "Explore the catalog",
       label: "Lumina selection",
       discover: "View product"
+    },
+    comments: {
+      title: "Product comments",
+      empty: "No comments yet. Be the first to share your thoughts!",
+      placeholder: "Share your experience with this product...",
+      submit: "Post comment",
+      login: "Sign in to comment",
+      loading: "Loading comments...",
+      loadError: "Comments could not be loaded.",
+      postError: "Could not post your comment. Please try again.",
+      posted: "Comment posted.",
+      characterCount: "characters"
     },
     tracking: {
       title: "Tracking Center.",
