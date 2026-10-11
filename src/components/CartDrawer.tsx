@@ -36,7 +36,6 @@ export default function CartDrawer({ isOpen, onClose, onOrderSuccess }: { isOpen
   const { data: session } = useSession();
   const [step, setStep] = useState<"cart" | "checkout" | "success">("cart");
   const [paymentStage, setPaymentStage] = useState<"details" | "payment">("details");
-  const [provider, setProvider] = useState<PaymentProvider>("stripe");
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
   const [paymentConfigLoading, setPaymentConfigLoading] = useState(false);
   const [paymentAttempt, setPaymentAttempt] = useState<PaymentAttempt | null>(null);
@@ -66,9 +65,6 @@ export default function CartDrawer({ isOpen, onClose, onOrderSuccess }: { isOpen
         throw new Error(config.error ?? "No se pudo cargar la configuración de pagos.");
       }
       setPaymentConfig(config as PaymentConfig);
-      if (!config.stripe?.enabled && config.mercadoPago?.enabled) {
-        setProvider("mercadopago");
-      }
     } catch (error) {
       if (!(error instanceof Error && error.name === "AbortError")) {
         setOrderError(error instanceof Error ? error.message : "No se pudo cargar la configuración de pagos.");
@@ -130,8 +126,7 @@ export default function CartDrawer({ isOpen, onClose, onOrderSuccess }: { isOpen
 
     if (!paymentConfig || paymentConfigLoading) return;
     if (
-      (provider === "stripe" && !paymentConfig.stripe.enabled) ||
-      (provider === "mercadopago" && !paymentConfig.mercadoPago.enabled)
+      !paymentConfig.stripe.enabled
     ) {
       setOrderError("El medio de pago seleccionado no está disponible.");
       return;
@@ -144,7 +139,7 @@ export default function CartDrawer({ isOpen, onClose, onOrderSuccess }: { isOpen
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          provider,
+          provider: "stripe",
           items: items.map(({ id, quantity }) => ({ id, quantity })),
           ...formData
         }),
@@ -405,43 +400,26 @@ export default function CartDrawer({ isOpen, onClose, onOrderSuccess }: { isOpen
                     {paymentStage === "details" ? (
                       <div className="space-y-4 border-t border-white/10 pt-6">
                         <p className="text-xs font-black uppercase tracking-widest text-white/50">
-                          {lang === "es" ? "Medio de pago" : "Payment method"}
+                          {lang === "es" ? "Método de pago" : "Payment method"}
                         </p>
                         {paymentConfigLoading ? (
-                          <p className="text-sm text-white/40">{lang === "es" ? "Cargando medios de pago..." : "Loading payment methods..."}</p>
+                          <p className="text-sm text-white/40">{lang === "es" ? "Cargando método de pago..." : "Loading payment method..."}</p>
                         ) : (
                           <div className="grid grid-cols-1 gap-3">
                             {paymentConfig?.stripe.enabled && (
-                              <button
-                                type="button"
-                                onClick={() => setProvider("stripe")}
-                                className={`rounded-xl border p-4 text-left transition-colors ${provider === "stripe" ? "border-indigo-400 bg-indigo-500/10" : "border-white/10 bg-white/[0.02]"}`}
-                              >
+                              <div className="rounded-xl border border-indigo-400 bg-indigo-500/10 p-4 text-left">
                                 <span className="font-bold text-white">Stripe</span>
                                 <span className="mt-1 block text-xs text-white/40">
-                                  {lang === "es" ? "Cobro en USD" : "Charged in USD"}
+                                  {lang === "es" ? "Pago seguro en USD" : "Secure payment in USD"}
                                 </span>
-                              </button>
-                            )}
-                            {paymentConfig?.mercadoPago.enabled && (
-                              <button
-                                type="button"
-                                onClick={() => setProvider("mercadopago")}
-                                className={`rounded-xl border p-4 text-left transition-colors ${provider === "mercadopago" ? "border-indigo-400 bg-indigo-500/10" : "border-white/10 bg-white/[0.02]"}`}
-                              >
-                                <span className="font-bold text-white">Mercado Pago</span>
-                                <span className="mt-1 block text-xs text-white/40">
-                                  {lang === "es" ? "Cobro en pesos argentinos" : "Charged in Argentine pesos"}
-                                </span>
-                              </button>
+                              </div>
                             )}
                             {paymentConfig &&
-                              !paymentConfig.stripe.enabled &&
-                              !paymentConfig.mercadoPago.enabled && (
+                              !paymentConfig.stripe.enabled && (
                               <p role="alert" className="text-sm text-amber-300">
                                 {lang === "es"
-                                  ? "El servicio responde, pero faltan las credenciales de prueba de Stripe o Mercado Pago."
-                                  : "The service is responding, but Stripe or Mercado Pago test credentials are missing."}
+                                  ? "El servicio responde, pero faltan las credenciales de prueba de Stripe."
+                                  : "The service is responding, but Stripe test credentials are missing."}
                               </p>
                             )}
                             {!paymentConfig && !paymentConfigLoading && (
@@ -528,7 +506,7 @@ export default function CartDrawer({ isOpen, onClose, onOrderSuccess }: { isOpen
                             }}
                             className="w-full py-3 text-xs font-bold uppercase tracking-widest text-white/40 hover:text-white"
                           >
-                            {lang === "es" ? "Cambiar medio de pago" : "Change payment method"}
+                            {lang === "es" ? "Editar datos de envío" : "Edit shipping details"}
                           </button>
                         )}
                       </div>
@@ -592,7 +570,7 @@ export default function CartDrawer({ isOpen, onClose, onOrderSuccess }: { isOpen
                 <div className="flex flex-col gap-3">
                   <button 
                     onClick={handleCheckout}
-                    disabled={isSubmitting || (step === "checkout" && (paymentStage === "payment" || !isFormValid || paymentConfigLoading || !paymentConfig))}
+                    disabled={isSubmitting || (step === "checkout" && (paymentStage === "payment" || !isFormValid || paymentConfigLoading || !paymentConfig?.stripe.enabled))}
                     className="premium-btn w-full h-16 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
                   >
                     {isSubmitting ? (

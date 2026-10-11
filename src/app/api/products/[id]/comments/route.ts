@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { ADMIN_EMAIL } from "@/lib/admin-config";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -76,5 +77,33 @@ export async function POST(request: Request, { params }: RouteContext) {
   } catch (error) {
     console.error("Error creating product comment:", error);
     return NextResponse.json({ error: "No se pudo publicar el comentario" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request, { params }: RouteContext) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (session?.user?.email?.trim().toLowerCase() !== ADMIN_EMAIL) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
+
+    const { id: productId } = await params;
+    const commentId = new URL(request.url).searchParams.get("commentId");
+    if (!commentId) {
+      return NextResponse.json({ error: "Comentario no válido" }, { status: 400 });
+    }
+
+    const deleted = await prisma.$executeRaw`
+      DELETE FROM "ProductComment"
+      WHERE "id" = ${commentId} AND "productId" = ${productId}
+    `;
+    if (deleted === 0) {
+      return NextResponse.json({ error: "Comentario no encontrado" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting product comment:", error);
+    return NextResponse.json({ error: "No se pudo eliminar el comentario" }, { status: 500 });
   }
 }

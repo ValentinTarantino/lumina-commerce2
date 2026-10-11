@@ -76,6 +76,9 @@ export const translations = {
       loadError: "No se pudieron cargar los comentarios.",
       postError: "No se pudo publicar. Intentá de nuevo.",
       posted: "Comentario publicado.",
+      delete: "Eliminar comentario",
+      deleteError: "No se pudo eliminar el comentario.",
+      deleted: "Comentario eliminado.",
       characterCount: "caracteres"
     },
     tracking: {
@@ -259,6 +262,9 @@ export const translations = {
       loadError: "Comments could not be loaded.",
       postError: "Could not post your comment. Please try again.",
       posted: "Comment posted.",
+      delete: "Delete comment",
+      deleteError: "Could not delete the comment.",
+      deleted: "Comment deleted.",
       characterCount: "characters"
     },
     tracking: {

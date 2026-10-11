@@ -8,16 +8,6 @@ import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-type PaymentProvider = "stripe" | "mercadopago";
-
-type ExchangeQuote = {
-  totalArs: string;
-  exchangeRate: string;
-  updatedAt: string;
-  source: string;
-  quoteId: string;
-};
-
 type ShippingDetails = {
   recipientName: string;
   phone: string;
@@ -76,7 +66,7 @@ export async function POST(request: Request) {
     } catch {
       return NextResponse.json({ error: "La solicitud no es JSON válido." }, { status: 400 });
     }
-    if (!isRecord(body) || (body.provider !== "stripe" && body.provider !== "mercadopago")) {
+    if (!isRecord(body) || body.provider !== "stripe") {
       return NextResponse.json({ error: "Selecciona un medio de pago válido." }, { status: 400 });
     }
     if (!Array.isArray(body.items) || body.items.length < 1 || body.items.length > 50) {
@@ -105,7 +95,7 @@ export async function POST(request: Request) {
     }
 
     const shipping = readShipping(body);
-    const provider = body.provider as PaymentProvider;
+    const provider = "stripe" as const;
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) {
       return NextResponse.json({ error: "Usuario no encontrado." }, { status: 404 });
@@ -140,45 +130,19 @@ export async function POST(request: Request) {
     const totalUsd = (subtotalCents + 2000) / 100;
     const reference = `PAY-${randomUUID().replace(/-/g, "")}`;
 
-    let quote: ExchangeQuote | undefined;
-    if (provider === "mercadopago") {
-      quote = await callPaymentService<ExchangeQuote>("/quote", {
-        reference,
-        total_usd: totalUsd,
-      });
-    }
-
     const attempt = await prisma.paymentAttempt.create({
       data: {
         reference,
         provider,
         status: "PENDING",
-        currency: provider === "stripe" ? "USD" : "ARS",
+        currency: "USD",
         subtotalUsd,
         totalUsd,
-        totalArs: quote?.totalArs,
-        exchangeRate: quote?.exchangeRate,
-        quoteId: quote?.quoteId,
         items: items as Prisma.InputJsonValue,
         ...shipping,
         userId: user.id,
       },
     });
-
-    if (provider === "mercadopago") {
-      return NextResponse.json({
-        attemptId: attempt.id,
-        provider,
-        reference,
-        totalUsd,
-        quoteId: quote?.quoteId,
-        amount: Number(quote?.totalArs),
-        currency: "ARS",
-        exchangeRate: quote?.exchangeRate,
-        exchangeRateUpdatedAt: quote?.updatedAt,
-        exchangeRateSource: quote?.source,
-      });
-    }
 
     try {
       const intent = await callPaymentService<{ paymentIntentId: string; clientSecret: string }>(

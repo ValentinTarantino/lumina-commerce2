@@ -6,7 +6,7 @@ import { useState, useEffect, useRef, type FormEvent } from "react";
 import { 
   ShoppingCart, Zap, ShieldCheck, Globe, ArrowRight,
   Smartphone, Tv, Tablet, Search, Star, Menu, X, 
-  ChevronRight, Heart, User, Plus, Minus, ChevronDown, Headset, Truck, CheckCircle2
+  ChevronRight, Heart, User, Plus, Minus, ChevronDown, Headset, Truck, CheckCircle2, Trash2
 } from "lucide-react";
 import { useCart } from "@/store/useCart";
 import { useLang } from "@/store/useLang";
@@ -126,6 +126,7 @@ export default function Home() {
   const [commentError, setCommentError] = useState("");
   const [commentNotice, setCommentNotice] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -304,6 +305,28 @@ export default function Home() {
       setCommentError(t.comments.postError);
     } finally {
       setIsSubmittingComment(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!selectedProduct || !isAdminAccount || deletingCommentId) return;
+
+    setDeletingCommentId(commentId);
+    setCommentError("");
+    setCommentNotice("");
+    try {
+      const response = await fetch(
+        `/api/products/${encodeURIComponent(selectedProduct.id)}/comments?commentId=${encodeURIComponent(commentId)}`,
+        { method: "DELETE" },
+      );
+      if (!response.ok) throw new Error("comment_delete_failed");
+
+      setProductComments((current) => current.filter((comment) => comment.id !== commentId));
+      setCommentNotice(t.comments.deleted);
+    } catch {
+      setCommentError(t.comments.deleteError);
+    } finally {
+      setDeletingCommentId(null);
     }
   };
 
@@ -513,9 +536,23 @@ export default function Home() {
                       <article key={comment.id} className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-4">
                         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                           <span className="text-xs font-bold text-indigo-200">{comment.user.name || (lang === "es" ? "Usuario" : "Customer")}</span>
-                          <time dateTime={comment.createdAt} className="text-[10px] text-white/30">
-                            {new Intl.DateTimeFormat(lang === "es" ? "es-AR" : "en-US", { dateStyle: "medium" }).format(new Date(comment.createdAt))}
-                          </time>
+                          <div className="flex items-center gap-3">
+                            <time dateTime={comment.createdAt} className="text-[10px] text-white/30">
+                              {new Intl.DateTimeFormat(lang === "es" ? "es-AR" : "en-US", { dateStyle: "medium" }).format(new Date(comment.createdAt))}
+                            </time>
+                            {isAdminAccount && (
+                              <button
+                                type="button"
+                                onClick={() => void handleDeleteComment(comment.id)}
+                                disabled={deletingCommentId !== null}
+                                aria-label={`${t.comments.delete}: ${comment.user.name || (lang === "es" ? "Usuario" : "Customer")}`}
+                                title={t.comments.delete}
+                                className="rounded-lg p-1.5 text-white/35 transition-colors hover:bg-rose-400/10 hover:text-rose-300 disabled:cursor-wait disabled:opacity-50"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                         <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-white/70">{comment.text}</p>
                       </article>
