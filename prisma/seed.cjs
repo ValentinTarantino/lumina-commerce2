@@ -277,7 +277,7 @@ const products = [
     id: "mon3",
     name: "Samsung Odyssey G5 27\" QHD",
     price: 279,
-    image: "https://cdn.x-kom.pl/i/setup/images/prod/big/product-new-big%2C%2C2022/12/pr_2022_12_2_12_8_35_12_00.jpg",
+    image: "https://delkom.pl/pic3/3A91/285417/monitor-samsung-odyssey-g5-ls27ag500nuxen-przod-prawa-strona-jpg-720x.png",
     category: "Monitores",
     description: "Monitor gamer Odyssey de 27 pulgadas con resolución QHD y tasa de refresco de 165 Hz.",
     descriptionEn: "27-inch Odyssey gaming monitor with QHD resolution and a 165 Hz refresh rate.",
