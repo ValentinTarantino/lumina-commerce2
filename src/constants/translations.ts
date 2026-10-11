@@ -34,7 +34,8 @@ export const translations = {
         Audio: "Audio",
         Laptops: "Laptops",
         Gaming: "Gaming",
-        Accesorios: "Accesorios"
+        Accesorios: "Accesorios",
+        "Componentes PC": "Componentes PC"
       }
     },
     news: {
@@ -194,7 +195,8 @@ export const translations = {
         Audio: "Audio",
         Laptops: "Laptops",
         Gaming: "Gaming",
-        Accesorios: "Accessories"
+        Accesorios: "Accessories",
+        "Componentes PC": "PC Components"
       }
     },
     news: {

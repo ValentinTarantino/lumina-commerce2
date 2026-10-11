@@ -31,13 +31,13 @@ type TrackingOrder = {
   items: TrackingItem[];
 };
 
-function ProductZoom({ image, alt }: { image: string, alt: string }) {
+function ProductZoom({ image, alt, isComponent }: { image: string, alt: string, isComponent: boolean }) {
   return (
-    <div className="relative aspect-video md:aspect-square overflow-hidden rounded-2xl md:rounded-3xl bg-white/[0.02] border border-white/10 group/zoom">
+    <div className={`relative aspect-video md:aspect-square overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 group/zoom ${isComponent ? "bg-[#f5f5f5]" : "bg-white/[0.02]"}`}>
       <img 
         src={image} 
         alt={alt}
-        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/zoom:scale-125"
+        className={`w-full h-full transition-transform duration-700 ease-out ${isComponent ? "object-contain p-6" : "object-cover group-hover/zoom:scale-125"}`}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
     </div>
@@ -271,7 +271,7 @@ export default function Home() {
               <div className="relative grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-6 md:gap-10 lg:gap-12 items-center">
                 <div className="relative">
                   <div className="absolute -inset-6 hidden md:block bg-indigo-500/10 blur-3xl rounded-full pointer-events-none" />
-                  <ProductZoom image={selectedProduct.image} alt={selectedProduct.name} />
+                  <ProductZoom image={selectedProduct.image} alt={selectedProduct.name} isComponent={selectedProduct.category === "Componentes PC"} />
                 </div>
 
                 <div className="space-y-5 md:space-y-7 lg:pr-2">
@@ -740,11 +740,11 @@ export default function Home() {
                   onClick={() => setSelectedProduct(product)}
                   className="group glass-card overflow-hidden flex flex-col cursor-pointer"
                 >
-                  <div className="relative aspect-[4/5] overflow-hidden m-4 rounded-[1.5rem]">
+                  <div className={`relative aspect-[4/5] overflow-hidden m-4 rounded-[1.5rem] ${product.category === "Componentes PC" ? "bg-[#f5f5f5]" : ""}`}>
                     <img 
                       src={product.image} 
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 ease-out" 
+                      className={`w-full h-full transition-transform duration-1000 ease-out ${product.category === "Componentes PC" ? "object-contain p-6" : "object-cover group-hover:scale-105"}`}
                     />
                     <div className="absolute top-4 left-4 flex gap-2">
                       <span className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase italic">
