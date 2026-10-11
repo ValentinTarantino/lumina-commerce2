@@ -14,7 +14,7 @@
 *   **Diseño 100% Responsivo**: Optimización total para dispositivos móviles, tablets y desktop con una estética premium constante.
 *   **Arquitectura Full-Stack**: Frontend de alto rendimiento conectado a un backend ágil y seguro.
 *   **Gestión de Estado Avanzada**: Carrito de compras e idiomas persistentes mediante Zustand.
-*   **Catálogo ampliado**: 21 productos en siete categorías, con filtros dinámicos e imágenes de Unsplash.
+*   **Catálogo ampliado**: 31 productos en doce categorías, con filtros dinámicos e imágenes de producto.
 *   **Administración de inventario**: Panel protegido para consultar pedidos y actualizar stock.
 *   **Centro de Rastreo**: Sistema integrado para el seguimiento de pedidos en tiempo real.
 *   **Pagos de prueba**: Checkout con Stripe y Mercado Pago; FastAPI valida los pagos y cotiza USD a ARS con el dólar oficial vendedor.
@@ -86,7 +86,7 @@ Para iniciar sesión con Google, configura el cliente OAuth con el origen autori
 *   **100% Responsive Design**: Full optimization for mobile, tablet, and desktop devices with a consistent premium aesthetic.
 *   **Full-Stack Architecture**: High-performance frontend connected to an agile and secure backend.
 *   **Advanced State Management**: Persistent shopping cart and language settings via Zustand.
-*   **Expanded Catalog**: 21 products across seven categories, with dynamic filters and Unsplash images.
+*   **Expanded Catalog**: 31 products across twelve categories, with dynamic filters and product images.
 *   **Inventory Administration**: Protected panel for reviewing orders and updating stock.
 *   **Tracking Center**: Integrated system for real-time order monitoring.
 *   **Test payments**: Stripe and Mercado Pago checkout; FastAPI verifies payments and converts USD to ARS using the official selling rate.

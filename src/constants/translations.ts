@@ -35,7 +35,12 @@ export const translations = {
         Laptops: "Laptops",
         Gaming: "Gaming",
         Accesorios: "Accesorios",
-        "Componentes PC": "Componentes PC"
+        "Componentes PC": "Componentes PC",
+        RAMs: "RAMs",
+        Procesadores: "Procesadores",
+        "Placas de video": "Placas de video",
+        "Fuentes de poder": "Fuentes de poder",
+        Gabinetes: "Gabinetes"
       }
     },
     news: {
@@ -196,7 +201,12 @@ export const translations = {
         Laptops: "Laptops",
         Gaming: "Gaming",
         Accesorios: "Accessories",
-        "Componentes PC": "PC Components"
+        "Componentes PC": "PC Components",
+        RAMs: "RAM",
+        Procesadores: "Processors",
+        "Placas de video": "Graphics cards",
+        "Fuentes de poder": "Power supplies",
+        Gabinetes: "PC cases"
       }
     },
     news: {
