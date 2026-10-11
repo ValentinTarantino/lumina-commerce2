@@ -237,7 +237,7 @@ const products = [
     id: "ac6",
     name: "Logitech G PRO X TKL LIGHTSPEED",
     price: 189,
-    image: "https://resource.logitech.com/content/dam/gaming/en/products/pro-x-tkl/gallery-2-pro-x-tkl-black-lightspeed-gaming-keyboard.png.png",
+    image: "https://mtech.am/assets/images/e1/e1d741_Logitech-G-PRO-X-TKL-LIGHTSPEED-Black-1.jpg",
     category: "Accesorios",
     description: "Teclado mecánico inalámbrico tenkeyless con iluminación RGB, controles multimedia y rueda de volumen.",
     descriptionEn: "Tenkeyless wireless mechanical keyboard with RGB lighting, media controls, and a volume roller.",
