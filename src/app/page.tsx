@@ -135,6 +135,26 @@ export default function Home() {
   const [trackingNow, setTrackingNow] = useState(() => Date.now());
   const [isTracking, setIsTracking] = useState(false);
   const [trackingError, setTrackingError] = useState("");
+  const isModalOpen = Boolean(selectedProduct) || isCartOpen || isAdminPanelOpen;
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const previousPaddingRight = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.paddingRight = previousPaddingRight;
+    };
+  }, [isModalOpen]);
+
   const [userOrders, setUserOrders] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const trackingProgress = trackingResult

@@ -118,6 +118,17 @@ function StripeForm({
 
   return (
     <div>
+      <div className="mb-5 rounded-xl border border-indigo-500/20 bg-indigo-500/10 p-4 text-xs text-indigo-300">
+        <p className="mb-1 font-bold">
+          {spanish ? "Modo de demostración activo" : "Demo mode active!"}
+        </p>
+        <p>
+          {spanish ? "Para simular un pago exitoso, ingresa la tarjeta " : "To simulate a successful payment, enter the card "}
+          <strong className="cursor-pointer select-all rounded bg-indigo-500/20 px-1 tracking-widest text-indigo-200">4242 4242 4242 4242</strong>
+          <br />
+          {spanish ? "con cualquier fecha futura y CVC." : "with any future date and CVC."}
+        </p>
+      </div>
       <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-white/50">
         {spanish ? "Titular de la tarjeta" : "Cardholder name"}
       </label>
@@ -129,7 +140,8 @@ function StripeForm({
         required
       />
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs">
+        {/* Demo instructions are displayed above the cardholder field. */}
+        <div className="hidden">
           <p className="font-bold mb-1">
             {spanish ? "¡Modo de demostración activo!" : "Demo mode active!"}
           </p>
