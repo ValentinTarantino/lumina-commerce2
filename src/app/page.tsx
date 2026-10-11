@@ -47,7 +47,7 @@ function ProductZoom({ image, alt, isComponent, isSamsungOdyssey = false, isLogi
       <img 
         src={image} 
         alt={alt}
-        className={`w-full h-full transition-transform duration-700 ease-out ${isLogitechKeyboard ? "object-contain p-8 scale-[0.9] group-hover/zoom:scale-[0.98]" : isComponent ? (isSamsungOdyssey ? "object-contain p-7 scale-[0.92] group-hover/zoom:scale-100" : "object-contain p-6 group-hover/zoom:scale-110") : "object-cover group-hover/zoom:scale-125"}`}
+        className={`w-full h-full transition-transform duration-700 ease-out ${isLogitechKeyboard ? "object-contain p-3 scale-[1.02] group-hover/zoom:scale-[1.05]" : isComponent ? (isSamsungOdyssey ? "object-contain p-7 scale-[0.92] group-hover/zoom:scale-100" : "object-contain p-6 group-hover/zoom:scale-110") : "object-cover group-hover/zoom:scale-125"}`}
       />
       <div className={`absolute inset-0 pointer-events-none ${isComponent || isLogitechKeyboard ? "hidden" : "bg-gradient-to-t from-black/20 to-transparent"}`} />
     </div>
@@ -749,11 +749,11 @@ export default function Home() {
                   onClick={() => setSelectedProduct(product)}
                   className="group glass-card overflow-hidden flex flex-col cursor-pointer"
                 >
-                  <div className={`relative aspect-[4/5] overflow-hidden m-4 rounded-[1.5rem] ${pcPartCategories.has(product.category) ? "bg-white" : ""}`}>
+                  <div className={`relative aspect-[4/5] overflow-hidden m-4 rounded-[1.5rem] ${pcPartCategories.has(product.category) || product.id === "ac6" ? "bg-white" : ""}`}>
                     <img 
                       src={product.image} 
                       alt={product.name}
-                      className={`w-full h-full transition-transform duration-1000 ease-out ${product.id === "ac6" ? "object-contain p-8 scale-[0.9] group-hover:scale-[0.98]" : pcPartCategories.has(product.category) ? (product.id === "mon3" ? "object-contain p-8 scale-[0.92] group-hover:scale-100" : "object-contain p-6 group-hover:scale-110") : "object-cover group-hover:scale-105"}`}
+                      className={`w-full h-full transition-transform duration-1000 ease-out ${product.id === "ac6" ? "object-contain p-3 scale-[1.02] group-hover:scale-[1.05]" : pcPartCategories.has(product.category) ? (product.id === "mon3" ? "object-contain p-8 scale-[0.92] group-hover:scale-100" : "object-contain p-6 group-hover:scale-110") : "object-cover group-hover:scale-105"}`}
                     />
                     <div className="absolute top-4 left-4 flex gap-2">
                       <span className="bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase italic">
